@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Kirpputori</title>
+</head>
+
+<body>
+  <h1>Kirpputori</h1>
+  
+  {% if session.username %}
+  <p>
+    Olet kirjautunut nimellä {{ session.username }}
+  </p>
+  {% endif %}
+  
+  <p>
+    <a href= "/login">Kirjaudu sisään</a>
+    <a href= "/register">Luo tunnus</a>
+    <a href= "/logout">Kirjaudu ulos</a>
+  </p>
+</body>
+
+</html>
+
