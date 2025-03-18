@@ -4,6 +4,7 @@ from flask import redirect, render_template, request, session
 from werkzeug.security import check_password_hash, generate_password_hash
 import config
 import db
+import items
 
 app = Flask(__name__)
 app.secret_key = config.secret_key
@@ -15,7 +16,7 @@ def index():
 @app.route("/new_item")
 def new_item():
     return render_template("new_item.html")
-    
+  
 @app.route("/create_item", methods=["POST"])
 def create_item():
     title = request.form["title"]
@@ -23,12 +24,9 @@ def create_item():
     start_price = request.form["start_price"]
     user_id = session["user_id"]
     
-    try:
-        sql = """INSERT INTO items (title, description, start_price, user_id) VALUES (?, ?, ?, ?)"""
-        db.execute(sql, [title, description, start_price, user_id])
-        return redirect("/") 
-    except Exception as e:
-        return f"VIRHE: {str(e)}" 
+    items.add_item(title, description, start_price, user_id)
+
+    return redirect("/") 
   
 @app.route("/register")
 def register():
