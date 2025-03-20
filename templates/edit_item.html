@@ -20,6 +20,13 @@
      Hinta: <br />
      <input type="text" name="price" size="8"value="{{ item.price }}"/> €
     </p>
+    <p>
+    <select name="condition">
+        <option value="uusi" {% if item.condition == "uusi" %}selected{% endif %}>Uusi</option>
+        <option value="hyvä" {% if item.condition == "hyvä" %}selected{% endif %}>Hyvä</option>
+        <option value="kohtalainen" {% if item.condition == "kohtalainen" %}selected{% endif %}>Kohtalainen</option>
+      </select>
+    </p>
     <input type="hidden" name="item_id" value="{{ item.id }}" />
     <input type="submit" value="Päivitä ilmoitusta" />
   </form>

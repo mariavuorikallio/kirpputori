@@ -1,9 +1,10 @@
 from flask import session
 import db
 
-def add_item(title, description, price, user_id):
-    sql = """INSERT INTO items (title, description, price, user_id) VALUES (?, ?, ?, ?)"""
-    db.execute(sql, [title, description, price, user_id])
+def add_item(title, description, price, condition, user_id):
+    sql = """INSERT INTO items (title, description, price, condition, user_id) 
+             VALUES (?, ?, ?, ?, ?)"""
+    db.execute(sql, [title, description, price, condition, user_id])
 
 def get_items():
     sql = "SELECT id, title FROM items ORDER BY id DESC"
@@ -14,6 +15,7 @@ def get_item(item_id):
                     items.title,
                     items.description,
                     items.price,
+                    items.condition, 
                     users.id user_id,
                     users.username
              FROM items, users
@@ -21,17 +23,17 @@ def get_item(item_id):
                    items.id = ?"""
     return db.query(sql, [item_id])[0]
 
-def update_item(item_id, title, description, price):
+def update_item(item_id, title, description, price, condition):
     user_id = session.get("user_id")
 
     if not user_id:
         raise ValueError("User is not logged in")
 
     sql = """UPDATE items 
-             SET title = ?, description = ?, price = ? 
+             SET title = ?, description = ?, price = ?, condition = ? 
              WHERE id = ? AND user_id = ?"""
-
-    db.execute(sql, [title, description, price, item_id, user_id])
+    
+    db.execute(sql, [title, description, price, condition, item_id, user_id])
 
 def remove_item(item_id):
     sql = "DELETE FROM items WHERE id = ?"
@@ -43,5 +45,5 @@ def find_items(query):
              WHERE title LIKE ? OR description LIKE ?
              ORDER BY id DESC"""
     like = "%" + query + "%"
-    return db.query(sql, [like, like])      
+    return db.query(sql, [like, like])
 

@@ -17,11 +17,11 @@ def index():
 @app.route("/find_item")
 def find_item():
     query = request.args.get("query")
+    results = [] 
+
     if query:
-       results = items.find_items(query)
-    else:
-       query = ""
-       result= []
+        results = items.find_items(query)
+    
     return render_template("find_item.html", query=query, results=results)
     
 @app.route("/item/<int:item_id>")
@@ -38,9 +38,10 @@ def create_item():
     title = request.form["title"]
     description = request.form["description"]
     price = request.form["price"]
+    condition = request.form["condition"]
     user_id = session["user_id"]
     
-    items.add_item(title, description, price, user_id)
+    items.add_item(title, description, price, condition, user_id)
 
     return redirect("/")
      
@@ -51,12 +52,24 @@ def edit_item(item_id):
       
 @app.route("/update_item", methods=["POST"])
 def update_item():
-    item_id = request.form["item_id"]
-    title = request.form["title"]
-    description = request.form["description"]
-    price = request.form["price"]
+    item_id = request.form.get("item_id")
+    title = request.form.get("title")
+    description = request.form.get("description")
+    price = request.form.get("price")
+    condition = request.form.get("condition")  
 
-    items.update_item(item_id, title, description, price)
+    if not item_id or not title or not description or not price or not condition:
+        return "Missing required fields", 400 
+
+    try:
+        price = float(price)
+    except ValueError:
+        return "Invalid price", 400  
+
+    try:
+        items.update_item(item_id, title, description, price, condition)
+    except ValueError:
+        return "Item not found", 404  
 
     return redirect(f"/item/{item_id}")
     

@@ -7,23 +7,28 @@
 
 <body>
    <h1>{{ item.title }}</h1>
+   
    {% if session.user_id == item.user_id %}
-  <p>
-    <a href = "/edit_item/{{ item.id }}">Muokkaa</a>
-    <a href = "/remove_item/{{ item.id }}">Poista</a>
-  </p>
-  {% endif %}
+     <p>
+       <a href="/edit_item/{{ item.id }}">Muokkaa</a>
+       <a href="/remove_item/{{ item.id }}">Poista</a>
+     </p>
+   {% endif %}
+   
+   <p><strong>Kuvaus:</strong> {{ item.description }}</p>
+   
+   <p><strong>Hinta:</strong> {{ item.price }} €</p>
+   
+   <p><strong>Kunto:</strong> {{ item.condition }}</p>  
+   
+   <p><strong>Viimeksi muokattu:</strong> {{ item.last_modified }}</p>  
+   
+   <p><strong>Käyttäjä:</strong> {{ item.username }}</p>
+   
    <p>
-    {{ item.description }}
-   </p>
-   <p>Hinta: {{ item.price }} €
-   </p>
-   <p>
-   Käyttäjä: {{ item.username }}
-   </p>
-   <p>
-    <a href="/">Takaisin</a>
+     <a href="/">Takaisin</a>
    </p>
 </body>
 
 </html>
+
