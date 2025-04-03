@@ -9,6 +9,10 @@ from users import create_user, get_user_by_username
 app = Flask(__name__)
 app.secret_key = config.secret_key
 
+def require_login():
+    if "user_id" not in session:
+        abort(403)
+
 @app.route("/")
 def index():
     all_items = items.get_items()
@@ -36,10 +40,13 @@ def show_item(item_id):
 
 @app.route("/new_item")
 def new_item():
+    require_login()
     return render_template("new_item.html")
 
 @app.route("/create_item", methods=["POST"])
 def create_item():
+    require_login()
+    
     title = request.form["title"]
     description = request.form["description"]
     price = request.form["price"]
@@ -56,6 +63,7 @@ def create_item():
 
 @app.route("/edit_item/<int:item_id>")
 def edit_item(item_id):
+    require_login()
     item = items.get_item(item_id)
     if not item:
        abort(404)
@@ -94,6 +102,7 @@ def update_item():
 
 @app.route("/remove_item/<int:item_id>", methods=["GET", "POST"])
 def remove_item(item_id):
+    require_login()
     item = items.get_item(item_id)
     if not item:
        abort(404)
@@ -163,9 +172,10 @@ def login():
 
 @app.route("/logout")
 def logout():
-    session.pop("user_id", None)
-    session.pop("username", None)
-    flash("Olet kirjautunut ulos", "success")
+    if "user_id" in session: 
+        session.pop("user_id", None)
+        session.pop("username", None)
+        flash("Olet kirjautunut ulos", "success")
     return redirect("/")
 
 if __name__ == "__main__":
