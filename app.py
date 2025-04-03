@@ -27,6 +27,11 @@ def find_item():
 @app.route("/item/<int:item_id>")
 def show_item(item_id):
     item = items.get_item(item_id)
+
+    if item is None: 
+        flash(f"Tavaraa id {item_id} ei löytynyt", "error")
+        return redirect("/")
+
     return render_template("show_item.html", item=item)
 
 @app.route("/new_item")
@@ -52,6 +57,8 @@ def create_item():
 @app.route("/edit_item/<int:item_id>")
 def edit_item(item_id):
     item = items.get_item(item_id)
+    if not item:
+       abort(404)
     if item["user_id"] != session["user_id"]:
        abort(403)
     return render_template("edit_item.html", item=item)
@@ -60,6 +67,8 @@ def edit_item(item_id):
 def update_item():
     item_id = request.form.get("item_id")
     item = items.get_item(item_id)
+    if not item:
+       abort(404)
     if item["user_id"] != session["user_id"]:
        abort(403)
        
@@ -86,6 +95,8 @@ def update_item():
 @app.route("/remove_item/<int:item_id>", methods=["GET", "POST"])
 def remove_item(item_id):
     item = items.get_item(item_id)
+    if not item:
+       abort(404)
     if item["user_id"] != session["user_id"]:
        abort(403)
        
@@ -113,7 +124,8 @@ def register():
         password_hash = generate_password_hash(password1)
 
         try:
-            create_user(username, password_hash)  # Käytetään users.py-funktiota
+            create_user(username, password_hash)  
+            
         except sqlite3.IntegrityError:
             flash("Tunnus on jo varattu", "error")
             return redirect(url_for('register'))
@@ -126,8 +138,8 @@ def register():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if "user_id" in session:
-        return redirect("/")  # Jos käyttäjä on jo kirjautunut sisään, ohjaa etusivulle
-
+        return redirect("/") 
+        
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
