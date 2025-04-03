@@ -1,31 +1,48 @@
 <!DOCTYPE html>
-<html>
+<html lang="fi">
 
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kirjautuminen</title>
 </head>
 
 <body>
+  <h1>Kirjaudu sisään</h1>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <ul>
+        {% for category, message in messages %}
+          <li class="{{ category }}">{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+
   {% if session.username %}
-  <p>
-    Olet kirjautunut nimellä {{ session.username }}
-  </p>
-  <p>
-    <a href="/logout">Kirjaudu ulos</a>
-  </p>
+    <p>
+      Olet kirjautunut nimellä {{ session.username }}
+    </p>
+    <p>
+      <a href="/logout">Kirjaudu ulos</a>
+    </p>
   {% else %}
-  <form action="/login" method="post">
-    <p>
-      Tunnus: <br />
-      <input type="text" name="username" />
-    </p>
-    <p>
-      Salasana: <br />
-      <input type="password" name="password" />
-    </p>
-    <input type="submit" value="Kirjaudu" />
-  </form>
+
+    <form action="/login" method="post">
+      <p>
+        Tunnus: <br />
+        <input type="text" name="username" placeholder="Syötä käyttäjätunnus" required />
+      </p>
+      <p>
+        Salasana: <br />
+        <input type="password" name="password" placeholder="Syötä salasana" required />
+      </p>
+      <input type="submit" value="Kirjaudu" />
+    </form>
   {% endif %}
+
+  <p>Ei tiliä? <a href="/register">Rekisteröidy</a></p>
 </body>
 
 </html>

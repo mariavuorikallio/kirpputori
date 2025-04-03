@@ -1,26 +1,43 @@
 <!DOCTYPE html>
-<html>
+<html lang="fi">
 
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rekisteröinti</title>
 </head>
 
 <body>
-  <form action="/create" method="post">
+  <h1>Rekisteröidy</h1>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <ul>
+        {% for category, message in messages %}
+          <li class="{{ category }}">{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+
+  <form action="/register" method="post">
     <p>
       Tunnus: <br />
-      <input type="text" name="username" />
+      <input type="text" name="username" placeholder="Syötä käyttäjätunnus" required />
     </p>
     <p>
       Salasana: <br />
-      <input type="password" name="password1" />
+      <input type="password" name="password1" placeholder="Syötä salasana" required />
     </p>
     <p>
       Salasana uudestaan: <br />
-      <input type="password" name="password2" />
+      <input type="password" name="password2" placeholder="Toista salasana" required />
     </p>
     <input type="submit" value="Luo tunnus" />
   </form>
+
+  <p>Onko sinulla jo tili? <a href="/login">Kirjaudu sisään</a></p>
+
 </body>
 
 </html>
