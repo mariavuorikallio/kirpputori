@@ -5,7 +5,7 @@ import config
 import db
 import items
 import re
-from users import create_user, get_user_by_username
+import users
 
 app = Flask(__name__)
 app.secret_key = config.secret_key
@@ -18,6 +18,16 @@ def require_login():
 def index():
     all_items = items.get_items()
     return render_template("index.html", items=all_items)
+    
+@app.route('/user/<int:user_id>', methods=['GET'])
+def show_user(user_id):
+    user = users.get_user(user_id) 
+    if user:
+        items = users.get_items(user_id)
+        return render_template('show_user.html', user=user, items=items)
+    else:
+        print(f"User {user_id} not found")
+        return "User not found", 404
 
 @app.route("/find_item")
 def find_item():
