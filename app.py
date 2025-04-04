@@ -88,7 +88,11 @@ def update_item():
        abort(403)
        
     title = request.form.get("title")
+    if not title or len(title) > 50:
+       abort(403)
     description = request.form.get("description")
+    if not description or len(description) > 1000:
+       abort(403)
     price = request.form.get("price")
     condition = request.form.get("condition")
 
