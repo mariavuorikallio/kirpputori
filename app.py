@@ -6,6 +6,7 @@ import db
 import items
 import re
 import users
+from users import create_user, get_user_by_username
 
 app = Flask(__name__)
 app.secret_key = config.secret_key
@@ -65,7 +66,7 @@ def create_item():
     if not description or len(description) > 1000:
        abort(403)
     price = request.form["price"]
-    if not re.search("^[1-9][0-9]{0,3}$", start_price):
+    if not re.search("^[1-9][0-9]{0,3}$", price):
        abort(403)
     condition = request.form["condition"]
     
@@ -174,17 +175,16 @@ def login():
         username = request.form["username"]
         password = request.form["password"]
 
-        user = get_user_by_username(username) 
+        user = get_user_by_username(username)  
         if not user:
             flash("Käyttäjätunnusta ei löydy", "error")
             return redirect(url_for('login'))
 
-        user_id, password_hash = user
-        if check_password_hash(password_hash, password):
-            session["user_id"] = user_id
-            session["username"] = username
+        if check_password_hash(user["password_hash"], password):
+            session["user_id"] = user["id"] 
+            session["username"] = user["username"]
             flash("Tervetuloa takaisin!", "success")
-            return redirect("/")
+            return redirect("/") 
         else:
             flash("Väärä tunnus tai salasana", "error")
             return redirect(url_for('login'))

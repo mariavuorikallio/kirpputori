@@ -40,11 +40,9 @@ def last_insert_id():
     return getattr(g, 'last_insert_id', None)
 
 def query(sql, params=[]):
-    """
-    Suorittaa SELECT-kyselyn ja palauttaa tulokset.
-    """
     con = get_connection() 
-    result = con.execute(sql, params).fetchall() 
+    result = con.execute(sql, params).fetchall()
+    print(f"Query result: {result}")  
     return result
 
 def init_app(app):
