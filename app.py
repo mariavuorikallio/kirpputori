@@ -4,6 +4,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 import config
 import db
 import items
+import re
 from users import create_user, get_user_by_username
 
 app = Flask(__name__)
@@ -48,8 +49,14 @@ def create_item():
     require_login()
     
     title = request.form["title"]
+    if not title or len(title) > 50:
+       abort(403)
     description = request.form["description"]
+    if not description or len(description) > 1000:
+       abort(403)
     price = request.form["price"]
+    if not re.search("^[1-9][0-9]{0,3}$", start_price):
+       abort(403)
     condition = request.form["condition"]
     
     if "user_id" not in session:
