@@ -1,35 +1,73 @@
 <!DOCTYPE html>
-<html>
+<html lang="fi">
 
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Uusi ilmoitus</title>
 </head>
 
 <body>
-   <h1>Uusi ilmoitus</h1>
+  <h1>Uusi ilmoitus</h1>
+  
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <ul>
+        {% for category, message in messages %}
+          <li class="{{ category }}">{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+  
   <form action="/create_item" method="post">
     <p>
       Otsikko: <br />
-      <input type="text" name="title" maxlength="50"required />
+      <input type="text" name="title" maxlength="50" required />
     </p>
+    
     <p>
       Kuvaus: <br />
       <textarea name="description" rows="8" cols="60" maxlength="1000" required></textarea>
     </p>
-     <p>
-     Hinta: <br />
-     <input type="text" name="price" size="8" pattern="[1-9][0-9]{0,3}" required /> €
-    </p>
+
     <p>
-     Kunto: <br />
-      <select name="condition">
+      Hinta: <br />
+      <input type="text" name="price" size="8" pattern="[1-9][0-9]{0,3}" required /> €
+      <small>Syötä hinta ilman desimaaleja (esim. 100, 5000).</small>
+    </p>
+
+    <p>
+      Kunto: <br />
+      <select name="condition" required>
+        <option value="">Valitse</option>
         <option value="uusi">Uusi</option>
         <option value="hyvä">Hyvä</option>
         <option value="kohtalainen">Kohtalainen</option>
       </select>
     </p>
-    <input type="submit" value="Luo ilmoitus" />
+
+    <p>
+      Osasto: <br />
+      <select name="section" required>
+        <option value="">Valitse</option>
+        <option value="Antiikki ja taide">Antiikki ja taide</option>
+        <option value="Auto-, vene-ja moottoripyörätarvikkeet">Auto-, vene-ja moottoripyörätarvikkeet</option>
+        <option value="Elektroniikka ja kodinkoneet">Elektroniikka ja kodinkoneet</option>
+        <option value="Koti ja sisustus">Koti ja sisustus</option>
+        <option value="Lapset">Lapset</option>
+        <option value="Vaatteet">Vaatteet</option>
+        <option value="Kosmetiikka">Kosmetiikka</option>
+      </select>
+    </p>
+
+    <p>
+      <input type="submit" value="Luo ilmoitus" />
+    </p>
   </form>
+
+  <p><a href="/">Takaisin</a></p>
 </body>
 
 </html>
+

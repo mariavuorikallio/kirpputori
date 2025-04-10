@@ -1,18 +1,16 @@
 <!DOCTYPE html>
 <html>
-
 <head>
   <title>{{ item.title }}</title>
 </head>
-
 <body>
    <h1>{{ item.title }}</h1>
    
    {% if session.user_id == item.user_id %}
-     <p>
-       <a href="/edit_item/{{ item.id }}">Muokkaa</a>
-       <a href="/remove_item/{{ item.id }}">Poista</a>
-     </p>
+      <p>
+         <a href="/edit_item/{{ item.id }}">Muokkaa</a>
+         <a href="/remove_item/{{ item.id }}">Poista</a>
+      </p>
    {% endif %}
    
    <p><strong>Kuvaus:</strong> {{ item.description }}</p>
@@ -24,11 +22,19 @@
    <p><strong>Viimeksi muokattu:</strong> {{ item.last_modified }}</p>  
    
    <p><strong>Käyttäjä: <a href="/user/{{ item.user_id }}"> {{ item.username }}</a></strong></p>
-   
+   {% if classes %}
    <p>
-     <a href="/">Takaisin</a>
+     Luokat:
+      <ul>
+      {% for item_class in classes %}
+         <li>{{ item_class.title }}: {{ item_class.value }}</li>
+      {% endfor %}
+      </ul>
+     </p>
+     {% endif %}  
+   <p>
+      <a href="/">Takaisin</a>
    </p>
 </body>
-
 </html>
 
