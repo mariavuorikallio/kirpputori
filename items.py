@@ -2,23 +2,31 @@ from flask import session
 import db
 from datetime import datetime
 
+def get_all_classes():
+    sql = "SELECT title, value FROM classes ORDER BY id"
+    result = db.query(sql)
+    
+    classes = {} 
+    for title, value in result:
+        classes[title] = []
+    for title, value in result:
+        classes[title].append(value)
+        
+    return classes
+
 def add_item(title, description, price, condition, user_id, section, classes):
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    sql = """INSERT INTO items (title, description, price, condition, user_id, section, last_modified)
-             VALUES (?, ?, ?, ?, ?, ?, ?)"""
-    db.execute(sql, [title, description, price, condition, user_id, section, now])
-    
-    item_id = db.last_insert_id()
-    
+
+    sql = """INSERT INTO items (title, description, price, condition, user_id, section, created_at, last_modified)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)"""
+    db.execute(sql, [title, description, price, condition, user_id, section, now, now])  
+
+    item_id = db.last_insert_id()  
+
     sql = "INSERT INTO items_classes (item_id, title, value) VALUES (?, ?, ?)"
-    
-    db.execute(sql, [item_id, "Osasto", section])
-    
-    db.execute(sql, [item_id, "Kunto", condition])
-    
-    for class_title, value in classes:
-        db.execute(sql, [item_id, class_title, value])
-      
+    for title, value in classes:
+        db.execute(sql, [item_id, title, value])
+
 def get_classes(item_id):
     sql = "SELECT title, value FROM items_classes WHERE item_id = ?"
     return db.query(sql, [item_id])
@@ -52,11 +60,11 @@ def update_item(item_id, title, description, price, condition):
     if not user_id:
         raise ValueError("User is not logged in")
         
-        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")  
     sql = """UPDATE items
                SET title = ?, description = ?, price = ?, condition = ?, last_modified = ?
                WHERE id = ? AND user_id = ?"""
-    db.execute(sql, [title, description, price, condition, item_id, user_id])
+    db.execute(sql, [title, description, price, condition, now, item_id, user_id])
 
 def remove_item(item_id):
     sql = "DELETE FROM items WHERE id = ?"

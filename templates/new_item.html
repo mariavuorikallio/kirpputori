@@ -36,32 +36,17 @@
       <input type="text" name="price" size="8" pattern="[1-9][0-9]{0,3}" required /> €
       <small>Syötä hinta ilman desimaaleja (esim. 100, 5000).</small>
     </p>
-
-    <p>
-      Kunto: <br />
-      <select name="condition" required>
-        <option value="">Valitse</option>
-        <option value="uusi">Uusi</option>
-        <option value="hyvä">Hyvä</option>
-        <option value="kohtalainen">Kohtalainen</option>
-      </select>
-    </p>
-
-    <p>
-      Osasto: <br />
-      <select name="section" required>
-        <option value="">Valitse</option>
-        <option value="Antiikki ja taide">Antiikki ja taide</option>
-        <option value="Auto-, vene-ja moottoripyörätarvikkeet">Auto-, vene-ja moottoripyörätarvikkeet</option>
-        <option value="Elektroniikka ja kodinkoneet">Elektroniikka ja kodinkoneet</option>
-        <option value="Koti ja sisustus">Koti ja sisustus</option>
-        <option value="Lapset">Lapset</option>
-        <option value="Vaatteet">Vaatteet</option>
-        <option value="Kosmetiikka">Kosmetiikka</option>
-      </select>
-    </p>
-
-    <p>
+     {% for class in classes %}
+     <p>
+       {{ class }}: <br />
+       <select name="classes">
+         <option value=""(valitse)</option>
+       {% for option in classes[class] %}
+        <option value="{{ class }}:{{ option }}">{{ option }}</option>
+       {% endfor %}
+       </select>
+      </p>
+     {% endfor %}
       <input type="submit" value="Luo ilmoitus" />
     </p>
   </form>
@@ -70,4 +55,3 @@
 </body>
 
 </html>
-

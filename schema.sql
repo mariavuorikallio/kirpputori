@@ -4,17 +4,23 @@ CREATE TABLE IF NOT EXISTS users (
     password_hash TEXT NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS items (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+CREATE TABLE items (
+    id INTEGER PRIMARY KEY,
     title TEXT NOT NULL,
-    description TEXT,
+    description TEXT NOT NULL,
     price REAL NOT NULL,
     condition TEXT NOT NULL,
-    user_id INTEGER,
-    section TEXT NOT NULL DEFAULT '', 
-    FOREIGN KEY(user_id) REFERENCES users(id)
+    user_id INTEGER REFERENCES users,
+    section TEXT NOT NULL,
 );
 
+CREATE TABLE classes (
+    id INTEGER PRIMARY KEY,
+    title TEXT,
+    value TEXT
+    
+);
+  
 CREATE TABLE items_classes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     item_id INTEGER NOT NULL,
