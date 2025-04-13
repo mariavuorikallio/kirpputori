@@ -24,12 +24,21 @@
       <input type="number" name="price" size="8" value="{{ item.price }}" min="1" max="9999" required /> €
     </p>
     <p>
-      Kunto: <br />
-      <select name="condition">
-        <option value="uusi" {% if item.condition == "uusi" %}selected{% endif %}>Uusi</option>
-        <option value="hyvä" {% if item.condition == "hyvä" %}selected{% endif %}>Hyvä</option>
-        <option value="kohtalainen" {% if item.condition == "kohtalainen" %}selected{% endif %}>Kohtalainen</option>
-      </select>
+     {% for class, value in classes.items() %}
+       <p>
+         {{ class }}: <br />
+         <select name="classes[{{ class }}]">
+           <option value="">Valitse</option>
+           {% for option in all_classes[class] %}
+             {% if classes[class] == option %}
+               <option value="{{ option }}" selected>{{ option }}</option>
+             {% else %}
+               <option value="{{ option }}">{{ option }}</option>
+             {% endif %}
+           {% endfor %}
+         </select>
+       </p>
+     {% endfor %}
     </p>
     <input type="hidden" name="item_id" value="{{ item.id }}" />
     <p><input type="submit" value="Päivitä ilmoitusta" /></p>
@@ -37,3 +46,4 @@
 </body>
 
 </html>
+

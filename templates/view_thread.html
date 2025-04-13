@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keskustelu</title>
+</head>
+<body>
+    <h1>Keskustelu</h1>
+    <ul>
+        {% for message in messages %}
+            <li>
+                <strong>{{ message.username }}:</strong> 
+                {{ message.content or "Ei sisältöä" }}
+                <em>({{ message.sent_at or "Ei ajankohtaa" }})</em>
+            </li>
+        {% endfor %}
+    </ul>
+
+    {% if session.user_id %}
+        <form method="POST">
+            <textarea name="content" rows="4" cols="50" required></textarea><br>
+            <input type="submit" value="Lähetä viesti">
+        </form>
+    {% else %}
+        <p><em>Kirjaudu sisään lähettääksesi viestejä.</em></p>
+    {% endif %}
+    
+    <p><a href="/">Takaisin etusivulle</a></p>
+</body>
+</html>
+

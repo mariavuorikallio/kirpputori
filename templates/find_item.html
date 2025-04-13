@@ -10,7 +10,7 @@
 
  <form action="/find_item" method="get">
  <p>
-   Hakusana: <input type="text" name="query" value="{{ query }}">
+   Hakusana: <input type="text" name="query" value="{{ query or '' }}">
   </p>
   <input type="submit" value="Hae">
   </form>

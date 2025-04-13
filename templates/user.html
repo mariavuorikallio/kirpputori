@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <title>Käyttäjä {{ user.username }}</title>
+</head>
+<body>
+    <h1>Käyttäjä {{ user.username }}</h1>
+
+    {% if user.has_image %}
+        <p>
+            <img src="/image/{{ user.id }}" alt="Profiilikuva" style="max-height: 200px;">
+        </p>
+    {% endif %}
+
+    <p>
+        Käyttäjä on lähettänyt {{ messages | count }} viestiä
+    </p>
+
+{% if messages %}
+<h2>Käyttäjän viestiketjut</h2>
+<ul>
+    {% for message in messages %}
+        <li>
+            <a href="/thread/{{ message.thread_id }}#{{ message.id }}">
+                {{ message.thread_title }}
+            </a>
+            <br>
+            Lähetetty: {{ message.sent_at }}
+        </li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+<h2>Käyttäjän myynti-ilmoitukset</h2>
+<ul>
+{% for item in user_items %}
+  <li><a href="/item/{{ item.id }}">{{ item.title }}</a></li>
+{% endfor %}
+</ul>
+
+    <p>
+        <a href="/">Takaisin etusivulle</a>
+    </p>
+</body>
+</html>
+

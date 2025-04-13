@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>{{ item.title }}</title>
+</head>
+
+<body>
+  <h1>{{ item.title }}</h1>
+  <p>{{ item.description }}</p>
+
+  <h2>Viestit</h2>
+  {% for message in messages %}
+    <p><strong>{{ message.username }}</strong> ({{ message.sent_at }}):</p>
+    <p>{{ message.content }}</p>
+  {% else %}
+    <p>Ei viestejä vielä.</p>
+  {% endfor %}
+
+  {% if session.user_id %}
+    <h3>Lähetä viesti ilmoituksen tekijälle</h3>
+    <form action="/item/{{ item.id }}" method="POST">
+      <textarea name="content" rows="5" cols="40" placeholder="Kirjoita viesti"></textarea><br />
+      <input type="submit" value="Lähetä viesti" />
+    </form>
+  {% endif %}
+
+  <p><a href="/">Takaisin</a></p>
+
+  {% if session.user_id %}
+    <form action="/item/{{ item.id }}" method="POST">
+      <button type="submit">Lähetä viesti</button>
+    </form>
+  {% endif %}
+</body>
+
+</html>
+

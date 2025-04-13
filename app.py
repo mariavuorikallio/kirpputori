@@ -1,20 +1,17 @@
 import sqlite3
-import logging
-from flask import abort, Flask, redirect, render_template, request, session, flash, url_for
+from flask import Flask, redirect, render_template, request, session, flash, url_for, abort, make_response
 from werkzeug.security import check_password_hash, generate_password_hash
 import config
 import db
 import items
-import re
 import users
-from users import create_user, get_user_by_username
-from datetime import datetime
+import re
+from forum import Forum
+from messages import get_messages_for_user
 
+forum = Forum()
 app = Flask(__name__)
 app.secret_key = config.secret_key
-app.logger.setLevel(logging.WARNING)
-
-db.init_app(app)
 
 def require_login():
     if "user_id" not in session:
@@ -26,15 +23,48 @@ def index():
     all_items = items.get_items()
     return render_template("index.html", items=all_items)
 
-@app.route('/user/<int:user_id>', methods=['GET'])
+@app.route("/user/<int:user_id>", methods=['GET'])
 def show_user(user_id):
     user = users.get_user(user_id)
-    if user:
-        items = users.get_items(user_id)
-        return render_template('show_user.html', user=user, items=items)
-    else:
+    if not user:
         app.logger.warning(f"User {user_id} not found")
-        return "User not found", 404
+        abort(404)  
+    
+    user_items = users.get_items(user_id)
+    messages = get_messages_for_user(user_id)
+    
+    print(f"Messages for user {user_id}: {messages}")  
+    
+    return render_template('show_user.html', user=user, user_items=user_items, messages=messages)
+
+@app.route("/add_image", methods=["GET", "POST"])
+def add_image():
+    require_login()
+
+    if request.method == "GET":
+        return render_template("add_image.html")
+
+    file = request.files["image"]
+    if not file.filename.endswith(".jpg"):
+        return "VIRHE: väärä tiedostomuoto"
+
+    image = file.read()
+    if len(image) > 100 * 1024:
+        return "VIRHE: liian suuri kuva"
+
+    user_id = session["user_id"]
+    users.update_image(user_id, image)
+    return redirect("/user/" + str(user_id))
+
+@app.route("/image/<int:user_id>")
+def show_image(user_id):
+    image = users.get_image(user_id)
+    if not image:
+        abort(404)
+
+    response = make_response(bytes(image))
+    response.headers.set("Content-Type", "image/jpeg")
+    return response
 
 @app.route("/find_item")
 def find_item():
@@ -46,15 +76,39 @@ def find_item():
 
     return render_template("find_item.html", query=query, results=results)
 
-@app.route("/item/<int:item_id>")
+@app.route("/item/<int:item_id>", methods=["GET", "POST"])
 def show_item(item_id):
     item = items.get_item(item_id)
+    if not item:
+        abort(404)
 
-    if item is None:
-        flash(f"Tavaraa id {item_id} ei löytynyt", "error")
-        return redirect("/")
     classes = items.get_classes(item_id)
-    return render_template("show_item.html", item=item, classes=classes)
+    user_id = item["user_id"]
+
+    if "user_id" in session:
+        thread = forum.get_or_create_thread(item_id, session["user_id"], user_id)
+        thread_id = thread["id"]
+        messages = db.query("""
+            SELECT messages.content, messages.sent_at, users.username
+            FROM messages
+            JOIN users ON messages.user_id = users.id
+            WHERE thread_id = ?
+            ORDER BY messages.sent_at
+        """, [thread_id])
+    else:
+        messages = []
+
+    if request.method == "POST" and "user_id" in session:
+        content = request.form["content"]
+        sender_id = session["user_id"]
+        recipient_id = item["user_id"]
+
+        thread = forum.get_or_create_thread(item_id, sender_id, recipient_id)
+        forum.add_message(content, sender_id, thread["id"])
+
+        return redirect(url_for("view_thread", thread_id=thread["id"]))
+
+    return render_template("show_item.html", item=item, messages=messages, classes=classes)
 
 @app.route("/new_item")
 def new_item():
@@ -69,35 +123,30 @@ def create_item():
     print("--- CREATE ITEM CALLED ---")
     print(f"Session: {session}")
     print(f"Form data: {request.form}")
-
+    
     title = request.form["title"]
     description = request.form["description"]
     price = request.form["price"]
-    classes_from_form = request.form.getlist("classes") # Nimeä tämä selkeämmin
 
-    condition = None
-    section = None
-    classes_to_pass = [] # Luodaan lista välitettäväksi add_item-funktiolle
+    print(f"Form data keys: {list(request.form.keys())}")
 
-    for cls in classes_from_form:
-        if cls.startswith("Kunto:"):
-            condition = cls.split(":")[1]
-            classes_to_pass.append(("Kunto", condition)) # Lisätään purettu tieto
-        elif cls.startswith("Osasto:"):
-            section = cls.split(":")[1]
-            classes_to_pass.append(("Osasto", section)) # Lisätään purettu tieto
-        else:
-            parts = cls.split(":")
-            if len(parts) == 2:
-                classes_to_pass.append((parts[0], parts[1])) # Oletetaan muut luokat muotoa title:value
+    section = request.form.get("classes[Osasto]")
+    condition = request.form.get("classes[Kunto]")
 
-    print(f"Extracted Section: {section}, Condition: {condition}, Classes to pass: {classes_to_pass}")
+    print(f"Extracted Section: {section}, Condition: {condition}") 
 
-    # Tarkista otsikko, kuvaus ja hinta (kuten aiemmin)
+    if not section or not condition:
+        flash("Osasto ja Kunto ovat pakollisia", "error")
+        return redirect(url_for('new_item'))
 
-    # Tarkista kunto ja osasto (nyt tarkistetaan onko ne purettu onnistuneesti)
-    if not condition or not section:
-        flash("Kunto ja osasto ovat pakollisia", "error")
+    classes_to_pass = [("Osasto", section), ("Kunto", condition)]
+
+    print(f"Classes to pass: {classes_to_pass}")  
+    
+    try:
+        price = float(price)
+    except ValueError:
+        flash("Virheellinen hinta", "error")
         return redirect(url_for('new_item'))
 
     user_id = session["user_id"]
@@ -109,6 +158,7 @@ def create_item():
     except Exception as e:
         flash(f"Virhe lisäyksessä: {str(e)}", "error")
         return redirect(url_for('new_item'))
+
 @app.route("/update_item", methods=["POST"])
 def update_item():
     item_id = request.form.get("item_id")
@@ -118,7 +168,7 @@ def update_item():
         abort(404)
     if item["user_id"] != session["user_id"]:
         abort(403)
-    
+
     classes = []   
     for entry in request.form.getlist("classes"):
         if entry:
@@ -175,6 +225,42 @@ def remove_item(item_id):
             return redirect("/")
         else:
             return redirect(f"/item/{item_id}")
+            
+@app.route("/thread/<int:thread_id>", methods=["GET", "POST"])
+def view_thread(thread_id):
+    if "user_id" not in session:
+        flash("Kirjaudu sisään nähdäksesi viestiketjut", "error")
+        return redirect(url_for('login'))
+
+    current_user = session["user_id"]
+
+    thread = db.query("SELECT * FROM message_threads WHERE id = ?", [thread_id])
+    if not thread:
+        abort(404)
+
+    thread = thread[0]
+
+    if current_user not in (thread["sender_id"], thread["recipient_id"]):
+        abort(403)
+
+    messages = db.query("""
+        SELECT messages.content, messages.sent_at, users.username
+        FROM messages
+        JOIN users ON messages.user_id = users.id
+        WHERE thread_id = ?
+        ORDER BY messages.sent_at
+    """, [thread_id])
+
+    if request.method == "POST":
+        content = request.form["content"]
+        if content.strip():
+            db.execute(
+                "INSERT INTO messages (content, user_id, thread_id) VALUES (?, ?, ?)",
+                [content, current_user, thread_id]
+            )
+            return redirect(url_for("view_thread", thread_id=thread_id))
+
+    return render_template("view_thread.html", messages=messages, thread=thread)
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -187,12 +273,20 @@ def register():
             flash("Salasanat eivät ole samat", "error")
             return redirect(url_for('register'))
 
+        is_valid, message = users.validate_password_strength(password1)
+        if not is_valid:
+            flash(message, "error")
+            return redirect(url_for('register'))
+
         password_hash = generate_password_hash(password1)
 
         try:
-            create_user(username, password_hash)
+            users.create_user(username, password_hash)
         except sqlite3.IntegrityError:
             flash("Tunnus on jo varattu", "error")
+            return redirect(url_for('register'))
+        except ValueError as e:
+            flash(str(e), "error")
             return redirect(url_for('register'))
 
         flash("Tunnus luotu onnistuneesti", "success")
@@ -209,7 +303,7 @@ def login():
         username = request.form["username"]
         password = request.form["password"]
 
-        user = get_user_by_username(username)
+        user = users.get_user_by_username(username)
         if not user:
             flash("Käyttäjätunnusta ei löydy", "error")
             return redirect(url_for('login'))
@@ -235,4 +329,5 @@ def logout():
 
 if __name__ == "__main__":
     app.run(debug=True, host='127.0.0.1', port=5001)
+
 
