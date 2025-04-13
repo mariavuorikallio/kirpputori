@@ -1,8 +1,8 @@
 # Kirpputori
 
-
-Käyttäjä pystyy luomaan tunnuksen ja kirjautumaan sisään sovellukseen.
-Käyttäjä pystyy lisäämään, muokkaamaan ja poistamaan myyntikohteitaan.
-Käyttäjä pystyy lisäämään ja muokkaamaan ilmoitustensa otsikkoa, kuvausta ,hintaa ja kuntoa.
-Käyttäjä näkee sovellukseen lisätyt ilmoitukset.
-Käyttäjä pystyy etsimään ilmoituksia hakusanalla tai myynti-ilmoitusten kuvauksen perusteella.
+Tämä sovellus on alustava versio tori.fi-tyyppisestä ilmoitusalustasta, jossa käyttäjät voivat:
+- Rekisteröityä ja kirjautua sisään.
+- Luoda, muokata ja poistaa ilmoituksia.
+- Näyttää ja etsiä ilmoituksia etusivulta.
+- Lähettää viestejä toisten käyttäjien ilmoituksiin.
+- Valita ilmoituksille luokkia (esim. elektroniikka, kodinkoneet).
