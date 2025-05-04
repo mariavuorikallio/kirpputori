@@ -1,4 +1,5 @@
 from werkzeug.security import check_password_hash, generate_password_hash
+from db import query
 import db
 import re
 
@@ -74,7 +75,7 @@ def update_user(user_id, new_username, new_password):
              SET username = ?, password_hash = ?
              WHERE id = ?"""
     db.execute(sql, [new_username, new_password_hash, user_id])
-    
+
 def update_image(user_id, image):
     sql = "UPDATE users SET image = ? WHERE id = ?"
     db.execute(sql, [image, user_id])
@@ -83,30 +84,34 @@ def get_image(user_id):
     sql = "SELECT image FROM users WHERE id = ?"
     result = db.query(sql, [user_id])
     return result[0]["image"] if result else None
-    
+
 def get_messages(user_id):
     sql = """
-SELECT m.id,
-    m.content,
-    m.sent_at,
-    m.thread_id,
-    i.title AS item_title
-FROM
-    messages m
-JOIN
-    message_threads t ON m.thread_id = t.id
-JOIN
-    items i ON m.item_id = i.id
-WHERE
-    t.sender_id = ? OR t.recipient_id = ?
-ORDER BY
-    m.sent_at DESC
-"""
+    SELECT m.id,
+           m.content,
+           m.sent_at,
+           m.thread_id,
+           i.title AS item_title,
+           i.id AS item_id,
+           u.username AS sender
+    FROM messages m
+    JOIN message_threads t ON m.thread_id = t.id
+    JOIN items i ON m.item_id = i.id
+    JOIN users u ON m.sender_id = u.id
+    WHERE t.sender_id = ? OR t.recipient_id = ?
+    ORDER BY m.sent_at DESC
+    """
     return db.query(sql, [user_id, user_id])
-    
-def get_messages_for_user(user_id):
-    query = "SELECT * FROM messages WHERE user_id = ?"
-    return db.execute(query, (user_id,)).fetchall()
+
+def get_message_thread(thread_id):
+    sql = """
+    SELECT m.content, m.sent_at, u.username
+    FROM messages m
+    JOIN users u ON m.sender_id = u.id
+    WHERE m.thread_id = ?
+    ORDER BY m.sent_at ASC
+    """
+    return db.query(sql, [thread_id])
 
 def create_user_with_validation(username, password1, password2):
     if password1 != password2:
@@ -118,4 +123,44 @@ def create_user_with_validation(username, password1, password2):
         
     password_hash = generate_password_hash(password1)
     create_user(username, password_hash)
+
+def send_message(thread_id, sender_id, recipient_id, content, item_id):
+    sql = """
+    INSERT INTO messages (thread_id, sender_id, recipient_id, content, item_id)
+    VALUES (?, ?, ?, ?, ?)
+    """
+    db.execute(sql, [thread_id, sender_id, recipient_id, content, item_id])
+
+def get_messages_for_user(user_id):
+    sql = """
+    SELECT
+        m.content,
+        m.sent_at,
+        u.username,
+        CASE
+            WHEN t.sender_id = ? THEN (SELECT username FROM users WHERE id = t.recipient_id)
+            ELSE (SELECT username FROM users WHERE id = t.sender_id)
+        END AS other_user
+    FROM messages m
+    JOIN message_threads t ON m.thread_id = t.id
+    JOIN users u ON m.user_id = u.id
+    WHERE t.sender_id = ? OR t.recipient_id = ?
+    ORDER BY m.sent_at DESC
+    """
+    
+    rows = query(sql, [user_id, user_id, user_id])
+
+    return rows
+
+def get_messages_by_thread(thread_id):
+    sql = """
+    SELECT m.content, m.sent_at, u.username, m.thread_id, i.title AS item_title, m.item_id, u.id AS sender_id
+    FROM messages m
+    JOIN message_threads t ON m.thread_id = t.id
+    JOIN users u ON m.sender_id = u.id
+    JOIN items i ON m.item_id = i.id
+    WHERE m.thread_id = ?
+    ORDER BY m.sent_at
+    """
+    return query(sql, [thread_id])
 

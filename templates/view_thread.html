@@ -3,29 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Keskustelu</title>
+    <title>{{ thread.title }}</title>
 </head>
 <body>
-    <h1>Keskustelu</h1>
+    <h1>{{ thread.title }}</h1>
+    <p><strong>Vastaanottaja:</strong> {{ thread.recipient_username }}</p>
+
+    <h3>Viestit:</h3>
     <ul>
         {% for message in messages %}
             <li>
-                <strong>{{ message.username }}:</strong> 
-                {{ message.content or "Ei sisältöä" }}
-                <em>({{ message.sent_at or "Ei ajankohtaa" }})</em>
+                <strong>{{ message.username }}:</strong> {{ message.content }}
+                <br>
+                <small>{{ message.sent_at }}</small>
             </li>
+        {% else %}
+            <p>Ei viestejä vielä.</p>
         {% endfor %}
     </ul>
 
     {% if session.user_id %}
-        <form method="POST">
-            <textarea name="content" rows="4" cols="50" required></textarea><br>
-            <input type="submit" value="Lähetä viesti">
-        </form>
+    <h3>Lähetä uusi viesti</h3>
+    <form action="/thread/{{ thread.id }}" method="post">
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <textarea name="content" rows="4" cols="50" placeholder="Kirjoita viesti..." required></textarea><br>
+        <input type="submit" value="Lähetä viesti" />
+    </form>
     {% else %}
-        <p><em>Kirjaudu sisään lähettääksesi viestejä.</em></p>
+    <p><em>Et voi lähettää viestejä ennen kuin kirjaudut sisään.</em></p>
     {% endif %}
-    
+
     <p><a href="/">Takaisin etusivulle</a></p>
 </body>
 </html>

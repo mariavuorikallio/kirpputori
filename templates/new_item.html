@@ -20,35 +20,36 @@
         {% endif %}
     {% endwith %}
 
-    <form action="/create_item" method="post">
+    <form action="/create_item" method="post" id="itemForm">
+ <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <p>
             Otsikko: <br />
             <input type="text" name="title" maxlength="50" required />
         </p>
         <p>
             Kuvaus: <br />
-            <textarea name="description" rows="8" cols="60" maxlength="1000" required></textarea>
+            <textarea name="description" rows="8" cols="60" minlength="10" maxlength="1000" required></textarea>
+            <br />
+            <small>Kuvauksen tulee olla vähintään 10 merkkiä pitkä.</small>
         </p>
         <p>
             Hinta: <br />
             <input type="number" name="price" size="8" min="1" max="9999" required /> €
         </p>
-        <p>
-           {% for class_title, value in classes.items() %}
-    <p>
-        {{ class_title }}: <br />
-        <select name="classes[{{ class_title }}]">
-            <option value="">Valitse</option>
-            {% for option in classes[class_title] %}
-                <option value="{{ option }}" {% if option == value %}selected{% endif %}>{{ option }}</option>
-            {% endfor %}
-        </select>
-    </p>
-{% endfor %}
-        </p>
+        {% for class_title, options in classes.items() %}
+            <p>
+                {{ class_title }}: <br />
+                <select name="classes[{{ class_title }}]" required>
+                    <option value="">Valitse</option>
+                    {% for option in options %}
+                        <option value="{{ option }}">{{ option }}</option>
+                    {% endfor %}
+                </select>
+            </p>
+        {% endfor %}
         <p><input type="submit" value="Lisää ilmoitus" /></p>
     </form>
+
 </body>
 
 </html>
-

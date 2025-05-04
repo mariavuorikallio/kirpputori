@@ -1,69 +1,54 @@
 <!DOCTYPE html>
 <html lang="fi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{{ item.title }}</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ item.title }}</title>
 </head>
 <body>
-   <h1>{{ item.title }}</h1>
+    <h1>{{ item.title }}</h1>
 
-   <p><strong>Kuvaus:</strong> {{ item.description }}</p>
-   <p><strong>Hinta:</strong> {{ item.price if item.price else "Ei hinta" }} €</p>
+    <p><strong>Kuvaus:</strong> {{ item.description }}</p>
+    <p><strong>Hinta:</strong> {{ item.price if item.price else "Ei hinta" }} €</p>
 
-   {% if classes %}
-   <p><strong>Luokat:</strong></p>
-   <ul>
-     {% for class in classes %}
-       {% if class.title == "Osasto" %}
-         <li><strong>Osasto:</strong> {{ class.value }}</li>
-       {% elif class.title == "Kunto" %}
-         <li><strong>Kunto:</strong> {{ class.value }}</li>
-       {% endif %}
-     {% endfor %}
-   </ul>
-   {% endif %}
+    {% if classes %}
+    <p><strong>Luokat:</strong></p>
+    <ul>
+        {% for class in classes %}
+            {% if class.title == "Osasto" %}
+                <li><strong>Osasto:</strong> {{ class.value }}</li>
+            {% elif class.title == "Kunto" %}
+                <li><strong>Kunto:</strong> {{ class.value }}</li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+    {% endif %}
 
-   <p><strong>Ilmoituksen tekijä:</strong> 
-     <a href="/user/{{ item.user_id }}">{{ item.username }}</a>
-   </p>
+    <p><strong>Ilmoituksen tekijä:</strong>
+        <a href="/user/{{ item.user_id }}">{{ item.username }}</a>
+    </p>
 
-   {% if session.user_id == item.user_id %}
-     <p>
-       <a href="/edit_item/{{ item.id }}">Muokkaa</a>
-       <a href="/remove_item/{{ item.id }}">Poista</a>
-     </p>
-   {% endif %}
+    {% if session.user_id == item.user_id %}
+        <p>
+            <a href="/edit_item/{{ item.id }}">Muokkaa</a>
+            <a href="/remove_item/{{ item.id }}">Poista</a>
+        </p>
+    {% endif %}
 
-   <h2>Viestit</h2>
+    {% if session.user_id != item.user_id %}
+        <h2>Lähetä viesti ilmoituksen tekijälle</h2>
+        <form action="/item/{{ item.id }}" method="post">
+            <textarea name="content" rows="4" cols="50" placeholder="Kirjoita viesti..." required></textarea><br>
+            <input type="hidden" name="thread_id" value="{{ thread_id }}" />
+            <input type="submit" value="Lähetä viesti" />
+        </form>
+    {% elif session.user_id %}
+    {% else %}
+        <p><em>Et voi lähettää viestiä ennen kuin kirjaudut sisään.</em></p>
+    {% endif %}
 
-   {% if session.user_id == item.user_id %}
-     <p>Viestit ilmoituksen tekijälle:</p>
-     {% if messages %}
-       <ul>
-         {% for message in messages %}
-           <li><strong>{{ message.username }}:</strong> {{ message.content }} <em>({{ message.sent_at }})</em></li>
-         {% endfor %}
-       </ul>
-     {% else %}
-       <p>Ei viestejä vielä.</p>
-     {% endif %}
-   {% elif session.user_id %}
-     {% if thread_id %}
-       <p><a href="{{ url_for('view_thread', thread_id=thread_id) }}">Siirry viestiketjuun</a></p>
-     {% else %}
-       <p>Lähetä viesti ilmoituksen tekijälle:</p>
-       <form method="post">
-         <textarea name="content" rows="4" cols="40" required></textarea><br>
-         <input type="submit" value="Lähetä viesti" />
-       </form>
-     {% endif %}
-   {% else %}
-     <p><em>Et voi lähettää viestiä ennen kuin kirjaudut sisään.</em></p>
-   {% endif %}
-
-   <p><a href="/">Takaisin etusivulle</a></p>
-   <p><a href="/user/{{ item.user_id }}">Takaisin käyttäjän sivulle</a></p>
+    <p><a href="/">Takaisin etusivulle</a></p>
+    <p><a href="/user/{{ item.user_id }}">Takaisin käyttäjän sivulle</a></p>
 </body>
 </html>
 

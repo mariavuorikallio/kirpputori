@@ -33,4 +33,3 @@ class Forum:
         db.execute(sql, [content, user_id, thread_id])
         
         print(f"Message added: content={content}, user_id={user_id}, thread_id={thread_id}")
-

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="fi">
 <head>
     <meta charset="UTF-8">
@@ -35,13 +35,18 @@
 <h2>Käyttäjän myynti-ilmoitukset</h2>
 <ul>
 {% for item in user_items %}
-  <li><a href="/item/{{ item.id }}">{{ item.title }}</a></li>
+    <li><a href="/item/{{ item.id }}">{{ item.title }}</a></li>
 {% endfor %}
 </ul>
+
+    {% if session.user_id == user.id %}
+        <p>
+            <a href="/profile/edit">Muokkaa profiilia</a>
+        </p>
+    {% endif %}
 
     <p>
         <a href="/">Takaisin etusivulle</a>
     </p>
 </body>
 </html>
-

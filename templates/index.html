@@ -7,36 +7,29 @@
 
 <body>
   <h1>Kirpputori</h1>
-  
+
   {% if session.username %}
-  <p>
-    Olet kirjautunut nimellä {{ session.username }}, id-numerosi on {{ session.user_id }}
-  </p>
-  <p>
-    <a href= "/logout">Kirjaudu ulos</a>
-  </p>
-  
-  <p>
-   <a href= "/new_item">Uusi ilmoitus</a>
-  </p> 
+    <p>
+      Olet kirjautunut nimellä <a href="/user/{{ session.user_id }}">{{ session.username }}</a>, id-numerosi on {{ session.user_id }}
+    </p>
+    <p><a href="/logout">Kirjaudu ulos</a></p>
+    <p><a href="/new_item">Uusi ilmoitus</a></p>
   {% else %}
-  <p>
-    <a href= "/login">Kirjaudu sisään</a>
-    <a href= "/register">Luo tunnus</a>
-  </p>
+    <p>
+      <a href="/login">Kirjaudu sisään</a>
+      <a href="/register">Luo tunnus</a>
+    </p>
   {% endif %}
-   
-  <p>
-   <a href= "/find_item">Etsi</a>  <!-- Link to search page -->
-  </p>
-  
+
+  <p><a href="/find_item">Etsi</a></p>
+
   <h2>Ilmoitukset</h2>
-  
   <ul>
     {% for item in items %}
-    <li><a href= "/item/{{ item.id }}">{{ item.title }}</a></li>
+      <li><a href="/item/{{ item.id }}">{{ item.title }}</a></li>
     {% endfor %}
   </ul>
+
 </body>
 
 </html>

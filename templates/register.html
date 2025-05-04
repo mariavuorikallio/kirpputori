@@ -2,42 +2,87 @@
 <html lang="fi">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Rekisteröinti</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rekisteröinti</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            max-width: 600px;
+            margin: 2rem auto;
+            padding: 1rem;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 0.5rem;
+            margin-top: 0.3rem;
+            margin-bottom: 1rem;
+            box-sizing: border-box;
+        }
+
+        input[type="submit"] {
+            padding: 0.5rem 1rem;
+        }
+
+        .flashes {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 1rem;
+        }
+
+        .flashes li {
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            border-radius: 4px;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
 </head>
 
 <body>
-  <h1>Rekisteröidy</h1>
+    <h1>Rekisteröidy</h1>
 
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      <ul>
-        {% for category, message in messages %}
-          <li class="{{ category }}">{{ message }}</li>
-        {% endfor %}
-      </ul>
-    {% endif %}
-  {% endwith %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul class="flashes">
+                {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
 
-  <form action="/register" method="post">
-    <p>
-      Tunnus: <br />
-      <input type="text" name="username" placeholder="Syötä käyttäjätunnus" required />
-    </p>
-    <p>
-      Salasana: <br />
-      <input type="password" name="password1" placeholder="Syötä salasana" required />
-    </p>
-    <p>
-      Salasana uudestaan: <br />
-      <input type="password" name="password2" placeholder="Toista salasana" required />
-    </p>
-    <input type="submit" value="Luo tunnus" />
-  </form>
+    <form action="/register" method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-  <p>Onko sinulla jo tili? <a href="/login">Kirjaudu sisään</a></p>
+        <label for="username">Tunnus:</label>
+        <input type="text" name="username" id="username" placeholder="Syötä käyttäjätunnus" required>
 
+        <label for="password1">Salasana:</label>
+        <input type="password" name="password1" id="password1" placeholder="Syötä salasana" minlength="8" required>
+        <small>Salasanan tulee olla vähintään 8 merkkiä ja sisältää pieniä kirjaimia, isoja kirjaimia ja numeroita.</small>
+
+        <br><br>
+
+        <label for="password2">Salasana uudestaan:</label>
+        <input type="password" name="password2" id="password2" placeholder="Toista salasana" minlength="8" required>
+
+        <br><br>
+        <input type="submit" value="Luo tunnus">
+    </form>
+
+    <p>Onko sinulla jo tili? <a href="/login">Kirjaudu sisään</a></p>
 </body>
 
 </html>

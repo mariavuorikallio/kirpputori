@@ -7,6 +7,7 @@ INSERT INTO classes (title, value) VALUES ('Osasto', 'Koti ja sisustus') ;
 INSERT INTO classes (title, value) VALUES ('Osasto', 'Lapset') ;
 INSERT INTO classes (title, value) VALUES ('Osasto', 'Vaatteet') ;
 INSERT INTO classes (title, value) VALUES ('Osasto', 'Kosmetiikka') ;
+INSERT INTO classes (title, value) VALUES ('Osasto', 'Viihde ja harrastukset') ;
 
 INSERT INTO classes (title, value) VALUES ('Kunto', 'Uusi') ;
 INSERT INTO classes (title, value) VALUES ('Kunto', 'Hyvä') ;

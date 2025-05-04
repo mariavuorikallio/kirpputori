@@ -29,12 +29,24 @@ def execute(sql, params=[]):
         print(f"Unexpected error: {e}")
         raise
 
+def get_user_messages(user_id):
+    query = """
+        SELECT messages.content, messages.sent_at, users.username, messages.thread_id, items.id AS item_id, items.title AS item_title
+        FROM messages
+        JOIN users ON messages.user_id = users.id
+        JOIN items ON messages.item_id = items.id
+        WHERE messages.user_id = ?
+        ORDER BY messages.sent_at
+    """
+    result = db.execute(query, (user_id,)).fetchall()
+    return result
+    
 def query(sql, params=[]):
     try:
         con = get_connection()
         result = con.execute(sql, params).fetchall()
         print(f"Query result: {result}")
-        return result
+        return [dict(row) for row in result] 
     except sqlite3.Error as e:
         print(f"Database error: {e}")
         raise
@@ -46,7 +58,7 @@ def query_one(sql, params=[]):
     try:
         con = get_connection()
         result = con.execute(sql, params).fetchone()
-        return result
+        return dict(result) if result else None 
     except sqlite3.Error as e:
         print(f"Database error: {e}")
         raise
@@ -64,5 +76,3 @@ def last_insert_id():
 
 def init_app(app):
     app.teardown_appcontext(close_connection)
-
-
